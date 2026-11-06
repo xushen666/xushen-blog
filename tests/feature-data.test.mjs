@@ -25,26 +25,37 @@ describe("Feature Data & Resolver Tests", () => {
 	});
 
 	it("resolveProjectsData applies disabledKeys correctly", () => {
+		// 与 src/data/projects.ts 的占位数据保持一致
 		const config = {
 			enable: true,
 			categories: [],
-			disabledKeys: ["folkpatch"],
+			disabledKeys: ["placeholder-project"],
 		};
+		const all = resolveProjectsData({
+			enable: true,
+			categories: [],
+			disabledKeys: [],
+		});
+		assert.equal(all.length, 1);
 		const resolved = resolveProjectsData(config);
-		assert.ok(resolved.some((p) => p.key === "shirone"));
-		assert.ok(resolved.some((p) => p.key === "kernelpatch"));
-		assert.ok(!resolved.some((p) => p.key === "folkpatch"));
+		assert.ok(!resolved.some((p) => p.key === "placeholder-project"));
 	});
 
 	it("resolveSkillsData applies disabledNames correctly", () => {
+		// 与 src/data/skills.ts 的占位数据保持一致
 		const config = {
 			enable: true,
 			categories: [],
-			disabledNames: ["PHP"],
+			disabledNames: ["技能名称（占位）"],
 		};
+		const all = resolveSkillsData({
+			enable: true,
+			categories: [],
+			disabledNames: [],
+		});
+		assert.equal(all.length, 1);
 		const resolved = resolveSkillsData(config);
-		assert.ok(resolved.some((s) => s.name === "TypeScript"));
-		assert.ok(!resolved.some((s) => s.name === "PHP"));
+		assert.ok(!resolved.some((s) => s.name === "技能名称（占位）"));
 	});
 
 	it("resolveTimelineData applies disabledTitles and order correctly", () => {

@@ -1,10 +1,5 @@
 # CI and Node Test Contract
 
-> 本仓库是 xushen-blog 个人站：模板示例文章已删除，因此 `ci.yml` 中的 Playwright 浏览器回归 job
-> （`comment-tests`、`style-tests` 及其聚合 job）与断言它们存在的 `tests/style-regression-specs.test.mjs`
-> 已被移除。下文描述的浏览器回归流程保留给主题上游参考；`scripts/ci/*` 与 `tests/site/*` 仍在仓库中，
-> 可在本地手动运行。详见 `docs/personal-site.md` 的 CI 一节。
-
 This project runs unit tests directly with Node. CI uses Node 26.13.0. Astro/Vite supplies TypeScript, aliases, and extension resolution during development, but `node --test` does not; code loaded by tests must work in both environments.
 
 ## Runtime boundaries

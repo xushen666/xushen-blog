@@ -54,7 +54,18 @@ pnpm check:manifest   # 校验 Markdown 语法 manifest / skills 路径
 - Pagefind 提示部分路由没有 `<html>` 元素：那些是已关闭功能页的重定向页，不参与索引。
 - `src/plugins/markdown/remark-restore-bare-directives.mjs:36` 的 biome 提示为主题既有问题。
 
+## CI
+
+`.github/workflows/ci.yml` 保留四个 job：`Code quality`（biome）、`Diagnostics and tests`（astro / svelte 检查、
+manifest 校验、Node 单测）、`Windows path regressions`、`Build`（Node 26.13.0 生产构建）。
+
+主题原有的两个 Playwright 浏览器回归 job（`comment-tests` / `comment-regressions`、`style-tests` / `styles`）
+已移除：它们的用例写死了模板示例文章（`/posts/guide/`、`/posts/markdown-extended/`、`/posts/mdx-showcase/`），
+模板内容删除后必然 404。`tests/site/*.spec.ts` 与 `scripts/ci/*` 仍保留在仓库里，需要时可单独本地运行；
+要恢复这套整套回归，需先把对应示例文章放回（开发模式可见、生产构建会过滤 `draft: true`）。
+
 ## 部署
 
 构建产物是纯静态 `dist/`，`vercel.json` 为空对象，Vercel 用默认的 Astro 预设即可（Build `pnpm build`，
 Output `dist`）。注意构建第一步 `node scripts/content/sync.mjs` 在单仓模式下是空操作，不依赖外部内容仓。
+

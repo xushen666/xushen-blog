@@ -17,14 +17,19 @@ export const projectsConfig: ProjectsConfig = withUserConfig("projects", {
 	description: "$t:projectsBanner",
 	categories: [
 		{
-			key: "theme",
-			label: "Theme",
-			icon: "material-symbols:palette-outline-rounded",
+			key: "agent",
+			label: "Agent 应用",
+			icon: "material-symbols:smart-toy-outline-rounded",
 		},
 		{
-			key: "android",
-			label: "Android",
-			icon: "material-symbols:android-rounded",
+			key: "ml",
+			label: "深度学习",
+			icon: "material-symbols:neurology-outline-rounded",
+		},
+		{
+			key: "course",
+			label: "课程设计",
+			icon: "material-symbols:school-outline-rounded",
 		},
 	],
 	// disabledKeys: [],

@@ -14,6 +14,8 @@ import {
 	type SeriesEntity,
 } from "@utils/series-utils";
 import { getCategoryUrl, getPostUrl, url } from "@utils/url-utils";
+import { momentsConfig } from "@/config/momentsConfig";
+import { seriesConfig } from "@/config/seriesConfig";
 
 /**
  * 加载系列实体目录（Astro 内容层会缓存集合加载，多次调用成本可忽略）。
@@ -21,6 +23,8 @@ import { getCategoryUrl, getPostUrl, url } from "@utils/url-utils";
  * 可在 node --test 下直接导入。
  */
 export async function getSeriesCatalog(): Promise<Map<string, SeriesEntity>> {
+	// 未启用系列功能时不加载集合，避免空集合在构建期反复告警。
+	if (!seriesConfig.enable) return new Map();
 	const entries = await getCollection("series");
 	const catalog = new Map<string, SeriesEntity>();
 	for (const entry of entries) {
@@ -245,6 +249,8 @@ function withMomentThumbnails(image: MomentImage): MomentImage {
 }
 
 export async function getSortedMoments(): Promise<MomentItem[]> {
+	// 未启用动态功能时不加载集合，避免空集合在构建期反复告警。
+	if (!momentsConfig.enable) return [];
 	const entries = await getCollection("moments", ({ data }) => {
 		return import.meta.env.PROD ? data.draft !== true : true;
 	});

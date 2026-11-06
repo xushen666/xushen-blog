@@ -28,23 +28,23 @@ describe("Feature Data & Resolver Tests", () => {
 		const config = {
 			enable: true,
 			categories: [],
-			disabledKeys: ["folkpatch"],
+			disabledKeys: ["navigation-system"],
 		};
 		const resolved = resolveProjectsData(config);
-		assert.ok(resolved.some((p) => p.key === "shirone"));
-		assert.ok(resolved.some((p) => p.key === "kernelpatch"));
-		assert.ok(!resolved.some((p) => p.key === "folkpatch"));
+		assert.ok(resolved.some((p) => p.key === "travel-agent"));
+		assert.ok(resolved.some((p) => p.key === "digit-recognition"));
+		assert.ok(!resolved.some((p) => p.key === "navigation-system"));
 	});
 
 	it("resolveSkillsData applies disabledNames correctly", () => {
 		const config = {
 			enable: true,
 			categories: [],
-			disabledNames: ["PHP"],
+			disabledNames: ["Docker"],
 		};
 		const resolved = resolveSkillsData(config);
-		assert.ok(resolved.some((s) => s.name === "TypeScript"));
-		assert.ok(!resolved.some((s) => s.name === "PHP"));
+		assert.ok(resolved.some((s) => s.name === "Python"));
+		assert.ok(!resolved.some((s) => s.name === "Docker"));
 	});
 
 	it("resolveTimelineData applies disabledTitles and order correctly", () => {

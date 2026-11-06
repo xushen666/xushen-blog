@@ -14,3 +14,9 @@
 
 - GitHub：TODO
 - Email：TODO
+
+## 本站主题
+
+> **占位说明**：下面这张卡片是主题自带的 GitHub 仓库卡片示例，用来演示富文本卡片效果；不需要时整段删掉即可。
+
+::github{repo="LyraVoid/Shirone"}

@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { registerPersistentShellSync } from "./feature-page";
 
-const PROJECT_COUNT = 3;
+// 与 src/data/projects.ts 的占位数据保持一致；替换真实项目时同步修改。
+const PROJECT_COUNT = 1;
 
 test.describe("项目页", () => {
 	test.beforeEach(async ({ page }) => {
@@ -16,46 +17,24 @@ test.describe("项目页", () => {
 		);
 		await expect(page.locator(".page-header__title")).toHaveText("Projects");
 		await expect(page.locator(".projects-section__count")).toHaveText(
-			"3 projects",
+			"1 projects",
 		);
 
-		const shirone = page.locator('[data-project="shirone"]');
-		await expect(shirone.locator("h2")).toHaveText("Shirone");
-		await expect(shirone.locator(".project-card__cover img")).toHaveAttribute(
-			"src",
-			"/assets/projects/shirone.webp",
-		);
-		await expect(shirone).toHaveClass(/project-card--featured/);
-		await expect(shirone.locator('[data-phase="building"]')).toHaveText(
-			"Building",
-		);
-		await expect(shirone.locator(".project-card__technologies li")).toHaveCount(
-			4,
-		);
-		await expect(
-			shirone.getByRole("link", { name: "View source" }),
-		).toHaveAttribute("href", "https://github.com/LyraVoid/Shirone");
-
-		// 无封面项目：渲染图标瓷砖形态（不渲染封面区）
-		const folkpatch = page.locator('[data-project="folkpatch"]');
-		await expect(folkpatch.locator(".project-card__icon")).toBeVisible();
-		await expect(folkpatch.locator(".project-card__cover")).toHaveCount(0);
-		await expect(folkpatch.locator('[data-phase="building"]')).toHaveText(
+		const placeholder = page.locator('[data-project="placeholder-project"]');
+		await expect(placeholder.locator("h2")).toHaveText("示例项目（占位）");
+		// 占位项目没有封面：渲染图标瓷砖形态（不渲染封面区）
+		await expect(placeholder.locator(".project-card__icon")).toBeVisible();
+		await expect(placeholder.locator(".project-card__cover")).toHaveCount(0);
+		await expect(placeholder).toHaveClass(/project-card--featured/);
+		await expect(placeholder.locator('[data-phase="building"]')).toHaveText(
 			"Building",
 		);
 		await expect(
-			folkpatch.getByRole("link", { name: "View source" }),
-		).toHaveAttribute("href", "https://github.com/LyraVoid/FolkPatch");
-
-		const kernelpatch = page.locator('[data-project="kernelpatch"]');
-		await expect(kernelpatch.locator(".project-card__icon")).toBeVisible();
-		await expect(kernelpatch.locator(".project-card__cover")).toHaveCount(0);
-		await expect(kernelpatch.locator('[data-phase="shipped"]')).toHaveText(
-			"Shipped",
-		);
+			placeholder.locator(".project-card__technologies li"),
+		).toHaveCount(1);
 		await expect(
-			kernelpatch.getByRole("link", { name: "View source" }),
-		).toHaveAttribute("href", "https://github.com/lyravoid/KernelPatch");
+			placeholder.getByRole("link", { name: "View source" }),
+		).toHaveAttribute("href", "https://github.com/xushen666");
 	});
 
 	test("直接加载时导航高亮与侧栏页面过滤正确", async ({ page }) => {
@@ -68,34 +47,25 @@ test.describe("项目页", () => {
 		await expect(page.locator('widget-layout[data-id="tags"]')).toBeVisible();
 	});
 
-	test("分类筛选会同步项目数量与可见卡片（含 LoadingIndicator 过渡）", async ({
-		page,
-	}) => {
-		await page.getByRole("button", { name: "Android", exact: true }).click();
-		// 三段过渡的指示器阶段（contained LoadingIndicator 出现在内容区）
-		await expect(
-			page.locator(".projects-section__loading .m3-loading--contained"),
-		).toBeVisible();
-		await expect(page.locator(".project-card")).toHaveCount(2);
+	// 组件在分类数量 > 1 时才渲染筛选 chips（ProjectSection.svelte）；
+	// 占位数据只有一个分类，因此这里锁定「无筛选栏」的单分类形态。
+	test("单一分类时不渲染筛选 chips，数量与卡片保持同步", async ({ page }) => {
+		await expect(page.locator(".projects-section__chips")).toHaveCount(0);
 		await expect(page.locator(".projects-section__count")).toHaveText(
-			"2 projects",
+			"1 projects",
 		);
-		await expect(page.locator('[data-project="shirone"]')).toHaveCount(0);
-		await expect(page.locator('[data-project="folkpatch"]')).toBeVisible();
-		await expect(page.locator('[data-project="kernelpatch"]')).toBeVisible();
-		await expect(page.locator(".projects-section__loading")).toHaveCount(0);
-
-		await page.getByRole("button", { name: "Android", exact: true }).click();
 		await expect(page.locator(".project-card")).toHaveCount(PROJECT_COUNT);
 	});
 
 	test("实时搜索过滤与清除（URL ?q= 同步）", async ({ page }) => {
 		const searchInput = page.locator(".projects-section__search input");
 		await expect(searchInput).toBeVisible();
-		await searchInput.fill("Shirone");
+		await searchInput.fill("示例项目");
 		await expect(page.locator(".project-card")).toHaveCount(1);
-		await expect(page.locator('[data-project="shirone"]')).toBeVisible();
-		await expect(page).toHaveURL(/[?&]q=Shirone/);
+		await expect(
+			page.locator('[data-project="placeholder-project"]'),
+		).toBeVisible();
+		await expect(page).toHaveURL(/[?&]q=/);
 
 		// 清除搜索恢复全部
 		const clearBtn = page.locator(".projects-section__search-clear");
@@ -241,7 +211,7 @@ test.describe("项目页", () => {
 		await page.setViewportSize({ width: 1280, height: 900 });
 		const cards = page.locator(".project-card--without-cover");
 
-		await expect(cards).toHaveCount(PROJECT_COUNT - 1);
+		await expect(cards).toHaveCount(PROJECT_COUNT);
 
 		const rowsMerged = await cards.evaluateAll((elements) =>
 			elements.every((element) => {

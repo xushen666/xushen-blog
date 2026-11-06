@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { registerPersistentShellSync } from "./feature-page";
 
-const SKILL_COUNT = 21;
-const FRONTEND_COUNT = 8;
+// 与 src/data/skills.ts 的占位数据保持一致；替换真实技能时同步修改。
+const SKILL_COUNT = 1;
 
 test.describe("技能页", () => {
 	test.beforeEach(async ({ page }) => {
@@ -16,32 +16,25 @@ test.describe("技能页", () => {
 			"skills",
 		);
 		await expect(page.locator(".page-header__title")).toHaveText("Skills");
-		await expect(page.locator(".skills-section__count")).toHaveText(
-			"21 skills",
-		);
+		await expect(page.locator(".skills-section__count")).toHaveText("1 skills");
 
-		const typescript = page.locator(".skill-card", { hasText: "TypeScript" });
-		await expect(typescript).toContainText("Expert");
-		await expect(typescript.getByRole("meter")).toHaveAttribute(
+		const placeholder = page.locator(".skill-card", {
+			hasText: "技能名称（占位）",
+		});
+		await expect(placeholder).toContainText("Beginner");
+		await expect(placeholder.getByRole("meter")).toHaveAttribute(
 			"aria-valuenow",
-			"4",
+			"1",
 		);
 		await expect(
-			typescript.locator(".skill-card__segment--active"),
-		).toHaveCount(4);
+			placeholder.locator(".skill-card__segment--active"),
+		).toHaveCount(1);
 	});
 
-	test("分类 chips 可筛选并再次点击恢复全部", async ({ page }) => {
-		const frontend = page.getByRole("button", {
-			name: "Frontend",
-			exact: true,
-		});
-		await frontend.click();
-		await expect(frontend).toHaveAttribute("aria-pressed", "true");
-		await expect(page.locator(".skill-card")).toHaveCount(FRONTEND_COUNT);
-
-		await frontend.click();
-		await expect(frontend).toHaveAttribute("aria-pressed", "false");
+	// 组件在分类数量 > 1 时才渲染分类 chips（SkillSection.svelte）；
+	// 占位数据只有一个分类，因此这里锁定「无筛选栏」的单分类形态。
+	test("单一分类时不渲染分类 chips", async ({ page }) => {
+		await expect(page.locator(".skills-section__filters")).toHaveCount(0);
 		await expect(page.locator(".skill-card")).toHaveCount(SKILL_COUNT);
 	});
 

@@ -21,7 +21,9 @@ test.describe("分类索引页 /categories/", () => {
 			page.locator(".page-header__icon svg path").first(),
 		).toBeVisible();
 		const rows = page.locator(".category-index__row");
-		await expect(rows).toHaveCount(2);
+		// 演示文章（Examples / Guides）+ 占位草稿所在的 Uncategorized；
+		// 占位文章发布或删除后，这个数字需要同步调整。
+		await expect(rows).toHaveCount(3);
 		const first = rows.first();
 		await expect(first.locator(".category-index__name")).toHaveText("Examples");
 		// Cross-checked against the archive view rather than pinned: the category

@@ -33,10 +33,12 @@ test.describe("SSR 图标渲染", () => {
 		await expect(page.locator("#display-settings-switch svg")).toBeVisible();
 	});
 
-	test("侧栏个人资料社交链接图标可见（3 个）", async ({ page }) => {
+	test("侧栏个人资料社交链接图标可见（GitHub 与邮箱 2 个）", async ({
+		page,
+	}) => {
 		await page.goto("/");
 		const links = page.locator("a[rel='me'] svg");
-		await expect(links).toHaveCount(3);
+		await expect(links).toHaveCount(2);
 		await expect(links.first()).toBeVisible();
 	});
 

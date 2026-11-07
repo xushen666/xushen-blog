@@ -123,6 +123,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 文章与站点配置在私有内容仓里，astro check 依赖物化后的 src/content 与
+      # 生成的 src/user/user-config.ts，必须先同步一次。
+      - name: Materialize content repository
+        run: pnpm content:sync
+
       - name: Check Astro diagnostics
         run: pnpm exec astro check
 
@@ -232,6 +237,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # Comments are off by default, so this run covers the zero-footprint cases.
+      # 这一档没有 fixture 覆盖内容源，需要先从内容仓物化真实文章。
+      - name: Materialize content repository
+        if: matrix.mode == 'disabled'
+        run: pnpm content:sync
+
       - name: Run comment, content, a11y and swup container regressions with comments disabled
         if: matrix.mode == 'disabled'
         run: pnpm exec playwright test tests/site/comments.spec.ts tests/site/waline.spec.ts tests/site/mdx.spec.ts tests/site/a11y.spec.ts tests/site/swup-navigation.spec.ts
@@ -332,6 +342,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # playwright 的 webServer 直接起 astro dev（不经过 pnpm dev），
+      # 所以测试前要显式物化内容仓。
+      - name: Materialize content repository
+        run: pnpm content:sync
 
       - name: Run site browser regression shard
         run: bash scripts/ci/run-style-regressions.sh "${{ matrix.shard }}"

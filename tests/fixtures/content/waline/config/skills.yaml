@@ -1,0 +1,20 @@
+# skills.yaml —— 覆盖主题的 src/config/skillsConfig.ts
+# 只写想改的键；技能条目本体在 data/skills.ts。
+title: 技能
+description: 我常用的语言、框架与工具。
+categories:
+  - key: language
+    label: 编程语言
+    icon: material-symbols:code-rounded
+  - key: backend
+    label: 后端
+    icon: material-symbols:api-rounded
+  - key: data
+    label: 数据
+    icon: material-symbols:database-rounded
+  - key: ai
+    label: AI
+    icon: material-symbols:neurology-rounded
+  - key: tooling
+    label: 工具
+    icon: material-symbols:build-rounded

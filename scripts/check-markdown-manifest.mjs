@@ -31,6 +31,23 @@ function isNonEmptyString(value) {
 	return typeof value === "string" && value.trim().length > 0;
 }
 
+// 双仓模式下演示文章只存在于测试夹具：manifest 仍按内容仓逻辑路径书写，
+// 校验时补一次夹具回退，避免生产内容清空后文档引用整体失效。
+const CONTENT_FALLBACK_ROOTS = ["tests/fixtures/content/demo"];
+
+function existsInRepo(path) {
+	const candidates = [
+		path,
+		// 夹具按内容仓布局存放：src/content/... 对应 content/...。
+		...CONTENT_FALLBACK_ROOTS.map(
+			(prefix) => `${prefix}/${path.replace(/^src\//, "")}`,
+		),
+	];
+	return candidates.some((candidate) =>
+		existsSync(join(root, ...candidate.split("/"))),
+	);
+}
+
 function validateRepoPath(path, owner, field) {
 	if (!isNonEmptyString(path)) {
 		fail(`${owner}.${field} 包含空路径`);
@@ -45,7 +62,7 @@ function validateRepoPath(path, owner, field) {
 		fail(`${owner}.${field} 必须是仓库内相对路径：${path}`);
 		return;
 	}
-	if (!existsSync(join(root, ...path.split("/")))) {
+	if (!existsInRepo(path)) {
 		fail(`${owner}.${field} 指向不存在的文件：${path}`);
 	}
 }

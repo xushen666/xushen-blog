@@ -1,0 +1,14 @@
+# projects.yaml —— 覆盖主题的 src/config/projectsConfig.ts
+# 只写想改的键；项目条目本体在 data/projects.ts。
+title: 项目
+description: 持续打磨的作品、实验与系统。
+categories:
+  - key: agent
+    label: Agent 应用
+    icon: material-symbols:smart-toy-outline-rounded
+  - key: ml
+    label: 深度学习
+    icon: material-symbols:neurology-rounded
+  - key: course
+    label: 课程设计
+    icon: material-symbols:school-outline-rounded

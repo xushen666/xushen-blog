@@ -106,9 +106,17 @@ for (const entry of entries) {
 	}
 
 	// 正文中的相对路径必须真实存在，防止文档移动后技能漂移。
+	// 双仓模式下演示文章位于测试夹具，这里按 `src/` 去掉前缀后再回退一次。
 	for (const rel of extractRepoPaths(content)) {
 		pathCount += 1;
-		if (!existsSync(join(root, ...rel.split("/")))) {
+		const candidates = [
+			rel,
+			`tests/fixtures/content/demo/${rel.replace(/^src\//, "")}`,
+		];
+		const found = candidates.some((candidate) =>
+			existsSync(join(root, ...candidate.split("/"))),
+		);
+		if (!found) {
 			fail(`${entry.name}/SKILL.md 引用了不存在的路径：${rel}`);
 		}
 	}

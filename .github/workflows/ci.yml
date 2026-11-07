@@ -245,8 +245,9 @@ jobs:
           pnpm content:sync
           for dir in demo waline twikoo no-toc; do
             mkdir -p "tests/fixtures/content/$dir/config"
-            cp .content-src/config/site.yaml "tests/fixtures/content/$dir/config/site.yaml"
-            cp .content-src/config/profile.yaml "tests/fixtures/content/$dir/config/profile.yaml"
+            for file in site profile projects skills; do
+              cp ".content-src/config/$file.yaml" "tests/fixtures/content/$dir/config/$file.yaml"
+            done
           done
           CONTENT_DIR=tests/fixtures/content/demo pnpm content:sync --no-prune
 
@@ -351,8 +352,9 @@ jobs:
         run: |
           pnpm content:sync
           mkdir -p tests/fixtures/content/demo/config
-          cp .content-src/config/site.yaml tests/fixtures/content/demo/config/site.yaml
-          cp .content-src/config/profile.yaml tests/fixtures/content/demo/config/profile.yaml
+          for file in site profile projects skills; do
+            cp ".content-src/config/$file.yaml" "tests/fixtures/content/demo/config/$file.yaml"
+          done
           CONTENT_DIR=tests/fixtures/content/demo pnpm content:sync --no-prune
 
       - name: Run site browser regression shard

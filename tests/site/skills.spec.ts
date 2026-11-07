@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { registerPersistentShellSync } from "./feature-page";
 
-// 与 src/data/skills.ts 的占位数据保持一致；替换真实技能时同步修改。
-const SKILL_COUNT = 1;
+// 与内容仓 data/skills.ts 的真实技能列表保持一致；增删技能时同步修改。
+const SKILL_COUNT = 11;
 
 test.describe("技能页", () => {
 	test.beforeEach(async ({ page }) => {
@@ -15,27 +15,27 @@ test.describe("技能页", () => {
 			"data-current-page",
 			"skills",
 		);
-		await expect(page.locator(".page-header__title")).toHaveText("Skills");
-		await expect(page.locator(".skills-section__count")).toHaveText("1 skills");
-
-		const placeholder = page.locator(".skill-card", {
-			hasText: "技能名称（占位）",
-		});
-		await expect(placeholder).toContainText("Beginner");
-		await expect(placeholder.getByRole("meter")).toHaveAttribute(
-			"aria-valuenow",
-			"1",
+		await expect(page.locator(".page-header__title")).toHaveText("技能");
+		await expect(page.locator(".skills-section__count")).toHaveText(
+			"11 skills",
 		);
-		await expect(
-			placeholder.locator(".skill-card__segment--active"),
-		).toHaveCount(1);
+
+		const python = page.locator(".skill-card", { hasText: "Python" });
+		await expect(python).toContainText("Advanced");
+		await expect(python.getByRole("meter")).toHaveAttribute(
+			"aria-valuenow",
+			"3",
+		);
+		await expect(python.locator(".skill-card__segment--active")).toHaveCount(3);
 	});
 
-	// 组件在分类数量 > 1 时才渲染分类 chips（SkillSection.svelte）；
-	// 占位数据只有一个分类，因此这里锁定「无筛选栏」的单分类形态。
-	test("单一分类时不渲染分类 chips", async ({ page }) => {
-		await expect(page.locator(".skills-section__filters")).toHaveCount(0);
-		await expect(page.locator(".skill-card")).toHaveCount(SKILL_COUNT);
+	// 分类数量 > 1 时渲染分类 chips（SkillSection.svelte:51）；
+	// 真实技能分属编程语言 / 后端 / 数据 / AI / 工具，因此这里锁定筛选行为。
+	test("按分类筛选后卡片与计数同步变化", async ({ page }) => {
+		await expect(page.locator(".skills-section__filters")).toHaveCount(1);
+		await page.getByRole("button", { name: "AI" }).click();
+		await expect(page.locator(".skill-card")).toHaveCount(2);
+		await expect(page.locator(".skills-section__count")).toHaveText("2 skills");
 	});
 
 	test("侧栏页面过滤与直接加载导航高亮正确", async ({ page }) => {
@@ -54,7 +54,7 @@ test.describe("技能页 Swup 导航", () => {
 
 	registerPersistentShellSync("从持久顶栏进入后同步页面、导航与侧栏状态", {
 		key: "skills",
-		fromPath: "/games/",
+		fromPath: "/projects/",
 		toPath: /\/skills\/$/,
 		cardSelector: "skill-card",
 		cardCount: SKILL_COUNT,

@@ -236,25 +236,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Comments are off by default, so this run covers the zero-footprint cases.
-      # 这一档没有 fixture 覆盖内容源，需要先从内容仓物化真实文章。
-      - name: Materialize content repository
-        if: matrix.mode == 'disabled'
-        run: pnpm content:sync
+      # 双仓模式：先物化真实内容（身份覆盖层来自内容仓 config/），
+      # 把身份 YAML 刷进各 fixture 避免叠加时丢失标题/头像，
+      # 再叠加 demo fixture（演示文章、瞬间、系列与演示数据），
+      # 这样生产内容仓清空演示内容后，依赖演示内容的回归仍可运行。
+      - name: Materialize content and demo fixtures
+        run: |
+          pnpm content:sync
+          for dir in demo waline twikoo no-toc; do
+            mkdir -p "tests/fixtures/content/$dir/config"
+            cp .content-src/config/site.yaml "tests/fixtures/content/$dir/config/site.yaml"
+            cp .content-src/config/profile.yaml "tests/fixtures/content/$dir/config/profile.yaml"
+          done
+          CONTENT_DIR=tests/fixtures/content/demo pnpm content:sync --no-prune
 
       - name: Run comment, content, a11y and swup container regressions with comments disabled
         if: matrix.mode == 'disabled'
         run: pnpm exec playwright test tests/site/comments.spec.ts tests/site/waline.spec.ts tests/site/mdx.spec.ts tests/site/a11y.spec.ts tests/site/swup-navigation.spec.ts
 
-      # The fixture enables Waline through the content-repository config overlay;
-      # the specs mock its SDK, stylesheet, emoji packs and API. 双仓模式下
-      # `src/data/*.ts` 同样来自内容仓：先物化真实内容，再用 --no-prune 只叠加
-      # fixture 的 `config/` 覆盖层，否则音乐等数据文件会被剪掉。
+      # 内容与演示数据已在上一步物化，这里只叠加评论配置覆盖层。
       - name: Enable the Waline fixture
         if: matrix.mode == 'waline'
-        run: |
-          pnpm content:sync
-          CONTENT_DIR=tests/fixtures/content/waline pnpm content:sync --no-prune
+        run: CONTENT_DIR=tests/fixtures/content/waline pnpm content:sync --no-prune
 
       - name: Run comment regressions with Waline enabled
         if: matrix.mode == 'waline'
@@ -263,9 +266,7 @@ jobs:
       # The Twikoo fixture matches the SDK mock in comments.spec.ts.
       - name: Enable the Twikoo fixture
         if: matrix.mode == 'twikoo'
-        run: |
-          pnpm content:sync
-          CONTENT_DIR=tests/fixtures/content/twikoo pnpm content:sync --no-prune
+        run: CONTENT_DIR=tests/fixtures/content/twikoo pnpm content:sync --no-prune
 
       - name: Run comment regressions with Twikoo enabled
         if: matrix.mode == 'twikoo'
@@ -276,9 +277,7 @@ jobs:
       # navigation soft; the spec's default-configuration cases skip there.
       - name: Enable the no-toc fixture
         if: matrix.mode == 'no-toc'
-        run: |
-          pnpm content:sync
-          CONTENT_DIR=tests/fixtures/content/no-toc pnpm content:sync --no-prune
+        run: CONTENT_DIR=tests/fixtures/content/no-toc pnpm content:sync --no-prune
 
       - name: Run swup container regressions with the TOC widget disabled
         if: matrix.mode == 'no-toc'
@@ -346,9 +345,15 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # playwright 的 webServer 直接起 astro dev（不经过 pnpm dev），
-      # 所以测试前要显式物化内容仓。
-      - name: Materialize content repository
-        run: pnpm content:sync
+      # 所以要显式物化内容仓；随后叠加 demo fixture，让依赖演示文章的
+      # 样式回归在生产内容为空时也能运行。
+      - name: Materialize content and demo fixtures
+        run: |
+          pnpm content:sync
+          mkdir -p tests/fixtures/content/demo/config
+          cp .content-src/config/site.yaml tests/fixtures/content/demo/config/site.yaml
+          cp .content-src/config/profile.yaml tests/fixtures/content/demo/config/profile.yaml
+          CONTENT_DIR=tests/fixtures/content/demo pnpm content:sync --no-prune
 
       - name: Run site browser regression shard
         run: bash scripts/ci/run-style-regressions.sh "${{ matrix.shard }}"

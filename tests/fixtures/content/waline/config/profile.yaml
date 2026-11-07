@@ -1,0 +1,12 @@
+# profile.yaml —— 覆盖主题的 src/config/profileConfig.ts
+# 只写想改的键，其余保持主题默认值（主题升级后新默认值会自动生效）。
+avatar: assets/images/avatar.webp
+name: xushen
+bio: 计算机科学与技术 · 预计 2028 年毕业
+links:
+  - name: GitHub
+    icon: fa7-brands:github
+    url: https://github.com/xushen666
+  - name: Email
+    icon: material-symbols:mail-outline-rounded
+    url: mailto:871446573@qq.com

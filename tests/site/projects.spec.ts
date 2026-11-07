@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { registerPersistentShellSync } from "./feature-page";
 
-// 与 src/data/projects.ts 的占位数据保持一致；替换真实项目时同步修改。
-const PROJECT_COUNT = 1;
+// 与内容仓 data/projects.ts 的真实项目列表保持一致；增删项目时同步修改。
+const PROJECT_COUNT = 3;
 
 test.describe("项目页", () => {
 	test.beforeEach(async ({ page }) => {
@@ -15,26 +15,32 @@ test.describe("项目页", () => {
 			"data-current-page",
 			"projects",
 		);
-		await expect(page.locator(".page-header__title")).toHaveText("Projects");
+		await expect(page.locator(".page-header__title")).toHaveText("项目");
 		await expect(page.locator(".projects-section__count")).toHaveText(
-			"1 projects",
+			"3 projects",
 		);
 
-		const placeholder = page.locator('[data-project="placeholder-project"]');
-		await expect(placeholder.locator("h2")).toHaveText("示例项目（占位）");
-		// 占位项目没有封面：渲染图标瓷砖形态（不渲染封面区）
-		await expect(placeholder.locator(".project-card__icon")).toBeVisible();
-		await expect(placeholder.locator(".project-card__cover")).toHaveCount(0);
-		await expect(placeholder).toHaveClass(/project-card--featured/);
-		await expect(placeholder.locator('[data-phase="building"]')).toHaveText(
-			"Building",
+		const travelAgent = page.locator('[data-project="travel-agent"]');
+		await expect(travelAgent.locator("h2")).toHaveText("智旅通 TravelMate");
+		// 有封面的项目渲染封面区，图标瓷砖只在缺图时出现
+		await expect(travelAgent.locator(".project-card__cover")).toBeVisible();
+		await expect(travelAgent.locator(".project-card__icon")).toHaveCount(0);
+		await expect(travelAgent).toHaveClass(/project-card--featured/);
+		await expect(travelAgent.locator('[data-phase="shipped"]')).toHaveText(
+			"Shipped",
 		);
 		await expect(
-			placeholder.locator(".project-card__technologies li"),
-		).toHaveCount(1);
+			travelAgent.locator(".project-card__technologies li"),
+		).toHaveCount(5);
 		await expect(
-			placeholder.getByRole("link", { name: "View source" }),
-		).toHaveAttribute("href", "https://github.com/xushen666");
+			travelAgent.getByRole("link", { name: "View source" }),
+		).toHaveAttribute("href", "https://github.com/xushen666/travel-planner");
+
+		const navigation = page.locator('[data-project="navigation-system"]');
+		await expect(navigation).not.toHaveClass(/project-card--featured/);
+		await expect(
+			navigation.getByRole("link", { name: "View source" }),
+		).toHaveCount(0);
 	});
 
 	test("直接加载时导航高亮与侧栏页面过滤正确", async ({ page }) => {
@@ -47,24 +53,26 @@ test.describe("项目页", () => {
 		await expect(page.locator('widget-layout[data-id="tags"]')).toBeVisible();
 	});
 
-	// 组件在分类数量 > 1 时才渲染筛选 chips（ProjectSection.svelte）；
-	// 占位数据只有一个分类，因此这里锁定「无筛选栏」的单分类形态。
-	test("单一分类时不渲染筛选 chips，数量与卡片保持同步", async ({ page }) => {
-		await expect(page.locator(".projects-section__chips")).toHaveCount(0);
+	// 分类数量 > 1 时渲染筛选 chips（ProjectSection.svelte:160）；
+	// 真实项目分属 Agent 应用 / 深度学习 / 课程设计，因此这里锁定筛选行为。
+	test("按分类筛选后数量与卡片同步变化", async ({ page }) => {
+		await expect(page.locator(".projects-section__chips")).toHaveCount(1);
+		await page.getByRole("button", { name: "深度学习" }).click();
+		await expect(page.locator(".project-card")).toHaveCount(1);
+		await expect(
+			page.locator('[data-project="digit-recognition"]'),
+		).toBeVisible();
 		await expect(page.locator(".projects-section__count")).toHaveText(
 			"1 projects",
 		);
-		await expect(page.locator(".project-card")).toHaveCount(PROJECT_COUNT);
 	});
 
 	test("实时搜索过滤与清除（URL ?q= 同步）", async ({ page }) => {
 		const searchInput = page.locator(".projects-section__search input");
 		await expect(searchInput).toBeVisible();
-		await searchInput.fill("示例项目");
+		await searchInput.fill("智旅通");
 		await expect(page.locator(".project-card")).toHaveCount(1);
-		await expect(
-			page.locator('[data-project="placeholder-project"]'),
-		).toBeVisible();
+		await expect(page.locator('[data-project="travel-agent"]')).toBeVisible();
 		await expect(page).toHaveURL(/[?&]q=/);
 
 		// 清除搜索恢复全部
@@ -207,32 +215,12 @@ test.describe("项目页", () => {
 		}
 	});
 
-	test("无封面卡片在桌面端将技术栈与源码操作合并为同一行", async ({ page }) => {
+	test("所有项目都带封面，不出现无封面合并行形态", async ({ page }) => {
 		await page.setViewportSize({ width: 1280, height: 900 });
-		const cards = page.locator(".project-card--without-cover");
-
-		await expect(cards).toHaveCount(PROJECT_COUNT);
-
-		const rowsMerged = await cards.evaluateAll((elements) =>
-			elements.every((element) => {
-				const card = element as HTMLElement;
-				const technologies = card.querySelector<HTMLElement>(
-					".project-card__technologies",
-				);
-				const actions = card.querySelector<HTMLElement>(
-					".project-card__actions",
-				);
-				if (!technologies || !actions) return false;
-				const techBox = technologies.getBoundingClientRect();
-				const actionsBox = actions.getBoundingClientRect();
-				// 同一行：两个区域的垂直范围必须重叠
-				return (
-					techBox.top < actionsBox.bottom && actionsBox.top < techBox.bottom
-				);
-			}),
+		await expect(page.locator(".project-card--without-cover")).toHaveCount(0);
+		await expect(page.locator(".project-card__cover")).toHaveCount(
+			PROJECT_COUNT,
 		);
-
-		await expect(rowsMerged).toBe(true);
 	});
 });
 

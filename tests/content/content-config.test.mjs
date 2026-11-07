@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+	existsSync,
 	mkdirSync,
 	mkdtempSync,
 	readFileSync,
@@ -201,16 +202,22 @@ describe("读取内容仓配置", () => {
 
 describe("生成覆盖层模块", () => {
 	it("没有覆盖时与仓库里已提交的空模块完全一致", () => {
-		const committed = readFileSync(
-			new URL(`../../${GENERATED_CONFIG_FILE}`, import.meta.url),
-			"utf8",
-		);
-		// 没有这条一致性，local 模式下重新生成就会弄脏 git status。
+		const committedPath = new URL(`../../${GENERATED_CONFIG_FILE}`, import.meta.url);
+		// 双仓模式下这个文件由 `content:sync` 从内容仓的 config/*.yaml 生成，并且不再
+		// 进 git：只有「内容仓没有任何配置覆盖」时才应该等于 EMPTY_MODULE，所以先比对
+		// 生成器本身，再在文件确实为空模块时比对落盘内容。
+		assert.equal(generateModule([]).source, EMPTY_MODULE);
+		if (!existsSync(committedPath)) return;
 		// 比对前抹平换行：Windows 的 core.autocrlf 会把签出的文件变成 CRLF，
 		// 而生成器一律写 LF —— git 自己会归一化，这里也照做。
 		const normalize = (text) => text.split("\r\n").join("\n");
-		assert.equal(generateModule([]).source, EMPTY_MODULE);
-		assert.equal(normalize(committed), EMPTY_MODULE);
+		const committed = normalize(readFileSync(committedPath, "utf8"));
+		if (committed === EMPTY_MODULE) return;
+		// 内容仓带了配置覆盖（config/site.yaml、config/profile.yaml 等），文件本就非空。
+		assert.match(
+			committed,
+			/export const userConfigOverrides: Readonly<Record<string, unknown>> = \{/,
+		);
 	});
 
 	it("按领域标注类型，并把类型导入合并去重", () => {

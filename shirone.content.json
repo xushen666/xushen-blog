@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "type": "git",
+    "url": "https://github.com/xushen666/xushen-blog-content.git",
+    "ref": "main"
+  }
+}

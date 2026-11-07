@@ -14,6 +14,13 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # 内容仓（xushen-blog-content）是私有仓库，同步脚本需要带令牌的克隆地址。
+  # 在仓库 Settings > Secrets and variables > Actions 里配置 CONTENT_REPO_URL，
+  # 例如 https://x-access-token:<PAT>@github.com/xushen666/xushen-blog-content.git。
+  # 未配置时为空字符串，同步脚本会回落到 shirone.content.json 的 source。
+  CONTENT_REPO_URL: ${{ secrets.CONTENT_REPO_URL }}
+
 jobs:
   changes:
     name: Detect changed paths

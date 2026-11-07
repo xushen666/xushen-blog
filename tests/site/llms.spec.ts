@@ -15,7 +15,7 @@ test.describe("LLMs.txt & AI-friendly Content Endpoints", () => {
 		expect(text).toBeDefined();
 
 		// 验证基本元数据与核心章节
-		expect(text).toContain("# Shirone");
+		expect(text).toContain("# xushen · Code & Notes");
 		expect(text).toContain("## Core Pages");
 		expect(text).toContain("- [Home](");
 		expect(text).toContain("- [About](");
@@ -49,7 +49,7 @@ test.describe("LLMs.txt & AI-friendly Content Endpoints", () => {
 		expect(text).toBeDefined();
 
 		// 验证全量正文头部
-		expect(text).toContain("# Shirone - Full Content Archive");
+		expect(text).toContain("# xushen · Code & Notes - Full Content Archive");
 
 		// 验证公开文章包含完整正文内容
 		expect(text).toContain("## Shirone Markdown Enhancements");

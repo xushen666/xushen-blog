@@ -32,7 +32,7 @@ test.describe("动态页", () => {
 			"href",
 			"/about/",
 		);
-		await expect(first.locator(".moment-card__name")).toHaveText("Shirone");
+		await expect(first.locator(".moment-card__name")).toHaveText("xushen");
 		await expect(first.locator(".moment-card__author img")).toHaveAttribute(
 			"srcset",
 			/ 64w, .* 96w/,

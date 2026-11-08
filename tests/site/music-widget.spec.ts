@@ -105,6 +105,10 @@ test.describe("music sidebar architecture", () => {
 		page,
 	}) => {
 		test.skip(
+			resolveMusicOptions(musicConfig) === null,
+			"Music feature is disabled in this configuration",
+		);
+		test.skip(
 			musicConfig.provider !== "mixed",
 			"Local configuration is not using the mixed provider",
 		);
@@ -130,6 +134,10 @@ test.describe("music sidebar architecture", () => {
 		page,
 	}) => {
 		test.skip(
+			resolveMusicOptions(musicConfig) === null,
+			"Music feature is disabled in this configuration",
+		);
+		test.skip(
 			musicConfig.provider !== "local" && musicConfig.provider !== "mixed",
 			"Local configuration is not using local tracks",
 		);
@@ -147,6 +155,13 @@ test.describe("music sidebar architecture", () => {
 });
 
 test.describe("music sidebar client", () => {
+	// 音乐播放器在本站是关闭的（config/music.yaml），生产构建不会带出播放器
+	// 与音频资源；这些用例依赖真实的播放器 DOM，功能关闭时整体跳过。
+	test.skip(
+		resolveMusicOptions(musicConfig) === null,
+		"Music feature is disabled in this configuration",
+	);
+
 	test.beforeEach(async ({ page }) => {
 		await mountMusicClient(page);
 	});

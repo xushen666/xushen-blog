@@ -249,7 +249,14 @@ jobs:
               cp ".content-src/config/$file.yaml" "tests/fixtures/content/$dir/config/$file.yaml"
             done
           done
-          CONTENT_DIR=tests/fixtures/content/demo pnpm content:sync --no-prune
+          # demo fixture 只拥有演示文章与演示数据；projects / skills / about /
+          # snippets 仍取自真实内容。补齐后用剪枝模式同步，避免真实内容（例如
+          # 新写的文章）泄漏进回归，导致分类、标签计数与日历边界漂移。
+          mkdir -p tests/fixtures/content/demo/content/spec tests/fixtures/content/demo/content/snippets
+          cp src/data/projects.ts src/data/skills.ts tests/fixtures/content/demo/data/
+          cp src/content/spec/about.md tests/fixtures/content/demo/content/spec/about.md
+          cp -r src/content/snippets/. tests/fixtures/content/demo/content/snippets/
+          CONTENT_DIR=tests/fixtures/content/demo pnpm content:sync
 
       - name: Run comment, content, a11y and swup container regressions with comments disabled
         if: matrix.mode == 'disabled'
@@ -355,7 +362,14 @@ jobs:
           for file in site profile projects skills; do
             cp ".content-src/config/$file.yaml" "tests/fixtures/content/demo/config/$file.yaml"
           done
-          CONTENT_DIR=tests/fixtures/content/demo pnpm content:sync --no-prune
+          # 补齐 demo fixture 不拥有、但回归仍需要的那部分真实内容，再用剪枝
+          # 模式同步：否则真实内容仓里的新文章会叠加在演示文章之上，页面计数
+          # 与日历边界都会漂移。
+          mkdir -p tests/fixtures/content/demo/content/spec tests/fixtures/content/demo/content/snippets
+          cp src/data/projects.ts src/data/skills.ts tests/fixtures/content/demo/data/
+          cp src/content/spec/about.md tests/fixtures/content/demo/content/spec/about.md
+          cp -r src/content/snippets/. tests/fixtures/content/demo/content/snippets/
+          CONTENT_DIR=tests/fixtures/content/demo pnpm content:sync
 
       - name: Run site browser regression shard
         run: bash scripts/ci/run-style-regressions.sh "${{ matrix.shard }}"

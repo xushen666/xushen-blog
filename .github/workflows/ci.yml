@@ -249,6 +249,9 @@ jobs:
               cp ".content-src/config/$file.yaml" "tests/fixtures/content/$dir/config/$file.yaml"
             done
           done
+          # 回归断言以英文 UI 文案为准：夹具语言固定为 en，生产站点切语言时
+          # 不必改写数百条断言；语言切换本身由构建与人工验收覆盖。
+          sed -i 's/^lang:.*/lang: en/' tests/fixtures/content/*/config/site.yaml
           # demo fixture 只拥有演示文章与演示数据；projects / skills / about /
           # snippets 仍取自真实内容。补齐后用剪枝模式同步，避免真实内容（例如
           # 新写的文章）泄漏进回归，导致分类、标签计数与日历边界漂移。
@@ -362,6 +365,8 @@ jobs:
           for file in site profile projects skills; do
             cp ".content-src/config/$file.yaml" "tests/fixtures/content/demo/config/$file.yaml"
           done
+          # 与 comment-tests 一致：夹具固定英文 UI，避免生产语言切换牵动断言。
+          sed -i 's/^lang:.*/lang: en/' tests/fixtures/content/demo/config/site.yaml
           # 补齐 demo fixture 不拥有、但回归仍需要的那部分真实内容，再用剪枝
           # 模式同步：否则真实内容仓里的新文章会叠加在演示文章之上，页面计数
           # 与日历边界都会漂移。

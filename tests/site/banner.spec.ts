@@ -400,9 +400,7 @@ test.describe("banner wallpaper", () => {
 
 		await page.goto("/", { waitUntil: "domcontentloaded" });
 		await waitForBannerState(page, true);
-		await expect(page.locator("#banner-wrapper h1")).toHaveText(
-			"xushen · Code & Notes",
-		);
+		await expect(page.locator("#banner-wrapper h1")).toHaveText("xushen");
 		await expectSubtitleTyping(page);
 		await expect(page.locator("#navbar")).toHaveClass(
 			/top-app-bar--transparent/,

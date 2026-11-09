@@ -10,7 +10,7 @@ test.describe("Feed and Subscription System", () => {
 		const text = await response.text();
 		expect(text).toContain('<rss version="2.0"');
 		expect(text).toContain("<channel>");
-		expect(text).toContain("<title>xushen · Code &amp; Notes</title>");
+		expect(text).toContain("<title>xushen</title>");
 		expect(text).toContain("<item>");
 	});
 
@@ -27,7 +27,7 @@ test.describe("Feed and Subscription System", () => {
 		expect(text).toContain(
 			'<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">',
 		);
-		expect(text).toContain("<title>xushen · Code &amp; Notes</title>");
+		expect(text).toContain("<title>xushen</title>");
 		expect(text).toContain("<entry>");
 		expect(text).toContain('<content type="html">');
 	});

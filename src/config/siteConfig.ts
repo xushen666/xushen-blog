@@ -12,7 +12,7 @@ import { withUserConfig } from "../utils/config-overlay.ts";
 export const siteConfig: SiteConfig = withUserConfig("site", {
 	site: "https://xushen-blog.vercel.app/",
 	base: "/",
-	title: "xushen · Code & Notes",
+	title: "xushen",
 	subtitle: "记录 CS 学习、Agent 开发与项目实践",
 	// 电脑端顶栏标题与导航内容区域："left" 左对齐，"center" 居中。
 	topAppBar: {
@@ -70,7 +70,7 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		homeText: {
 			// 仅在首页 Banner 中显示，标题与副标题会上下居中排列。
 			enable: true,
-			title: "xushen · Code & Notes",
+			title: "xushen",
 			subtitle: [
 				"记录 CS 学习与课程笔记",
 				"复盘 Python、Java 与 Agent 开发项目",
